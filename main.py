@@ -7,9 +7,10 @@
 # https://docs.python.org/3/library/xml.etree.elementtree.html
 
 from typing import Iterator, List
-from flask import Flask, request
+from flask import Flask, request, render_template
 import xml.etree.ElementTree as ET
 import sys
+import constants
 
 
 argStr = ""
@@ -52,10 +53,37 @@ root = tree.getroot()
 
 
 def extractSearchCriteria(args, baseUrl: str):
+    """
+    Locates the search parameter and returns it
+
+    Args:
+        args (_type_): MultiDict structure defined by Flask
+        baseUrl (str): _description_
+    ToDo: handle white space etc in the search string
+    Returns:
+        str: Search name to use
+    """
     searchStr = args.get("search")
 
     print("Search request using >" + str(searchStr) + "<")
     return searchStr
+
+
+def extractIdCriteria(args, baseUrl: str):
+    """
+    Locates the id parameter and returns it
+
+    Args:
+        args (_type_): MultiDict structure defined by Flask
+        baseUrl (str): _description_
+
+    Returns:
+        str: Search name to use
+    """
+    id_str = args.get("id")
+
+    print("Search request using >" + str(id_str) + "<")
+    return id_str
 
 
 def listout(my_list: list):
@@ -85,32 +113,24 @@ def matchedAlbum(name: str, albums: Iterator):
     found = 0
 
     for album in albums:
-        albumname = album.find('Title').text
+        albumname = album.find(constants.TITLE).text
         if ((albumname != None) and (albumname.find(name) > 0)):
-            # matches.append(albumname)
-            matches.append([albumname, album.get("ID")])
+            matches.append([albumname, album.get(constants.ID)])
             found += 1
 
     print(" matches made = " + str(found))
     return matches
 
 
-@ app.route('/params')
+@ app.route('/help')
 def params():
-    return argStr
-
-
-@ app.route('/hello')
-def hello():
-    return 'Hello world'
+    return "TODO: Add Help info here"
 
 
 @ app.route('/test/')
 def test():
-    root = tree.getroot()
-    search = extractSearchCriteria(request.args, request.base_url)
-    albums = listout(matchedAlbum(search, root.iter('Album')))
-    return albums
+    return render_template('test.html', my_string="This a test, do not panic",
+                           my_list=["Album 1", "Album 2", "Album 3", "Album 4"])
 
 
 @ app.route('/test2')
@@ -120,40 +140,23 @@ def test2():
         result += child.tag + "</p>"
 
     result += "------</p>"
-    # for child in root.findall('Album'):
-    for child in root.iter('Album'):
-        print(child.find('Title').text)
+    for child in root.iter(constants.ALBUM):
+        print(child.find(constants.TITLE).text)
         # result += child.get('Title') + "</p>"
     return result
 
 
 @ app.route('/album')
 def listAlbums():
-    result = ""
-    # locate the album with the specific Id
-    return result
-
-
-@ app.route('/id/album')
-def getAlbum():
-    result = ""
-    # locate the album with the specific Id
-    return result
-
-
-@ app.route('/id/artist')
-def getArtist():
-    result = ""
-    # locate the artist with the specific Id
-    return result
-
-
-@ app.route('/id/recording')
-def getRecording():
-    result = ""
-    # locate the artist with the specific Id
-    return result
+    root = tree.getroot()
+    id = None
+    search = extractSearchCriteria(request.args, request.base_url)
+    if ((search == None) or (len(search) < 1)):
+        id = extractIdCriteria(request.args, request.base_url)
+    else:
+        albums = listout(matchedAlbum(search, root.iter(constants.ALBUM)))
+    return albums
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=80, host='0.0.0.0')
+    app.run(debug=True, port=constants.PORT, host=constants.HOST)
