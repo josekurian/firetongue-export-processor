@@ -6,11 +6,12 @@
 # https://flask.palletsprojects.com/en/2.1.x/
 # https://docs.python.org/3/library/xml.etree.elementtree.html
 
-from typing import Iterator, List
 from flask import Flask, request, render_template
 import xml.etree.ElementTree as ET
 import sys
-import constants
+import constants as const
+import svr_config as svr
+import data
 
 
 argStr = ""
@@ -98,33 +99,9 @@ def listout(my_list: list):
     return pretty_list
 
 
-def matchedAlbum(name: str, albums: Iterator):
-    """
-    matched_album examines the album names and determines whether they match the search criteria
-
-    Args:
-        name (str): the search criteria - does the name match
-        albums (Iterator): Iterator over the Albums structure of the data file
-
-    Returns:
-        List: List of lists, with the inner list made up of the matching album name and its unique Id
-    """
-    matches = []
-    found = 0
-
-    for album in albums:
-        albumname = album.find(constants.TITLE).text
-        if ((albumname != None) and (albumname.find(name) > 0)):
-            matches.append([albumname, album.get(constants.ID)])
-            found += 1
-
-    print(" matches made = " + str(found))
-    return matches
-
-
 @ app.route('/help')
 def params():
-    return "TODO: Add Help info here"
+    return render_template('help.html')
 
 
 @ app.route('/test/')
@@ -140,23 +117,29 @@ def test2():
         result += child.tag + "</p>"
 
     result += "------</p>"
-    for child in root.iter(constants.ALBUM):
-        print(child.find(constants.TITLE).text)
+    for child in root.iter(const.ALBUM):
+        print(child.find(const.TITLE).text)
         # result += child.get('Title') + "</p>"
     return result
 
 
 @ app.route('/album')
-def listAlbums():
+@ app.route('/album/')
+def album():
     root = tree.getroot()
-    id = None
+    id = id = extractIdCriteria(request.args, request.base_url)
     search = extractSearchCriteria(request.args, request.base_url)
-    if ((search == None) or (len(search) < 1)):
-        id = extractIdCriteria(request.args, request.base_url)
+    if ((search != None) and (len(search) < 1)):
+        print("album search for >" + str(search) + "<")
+        albums_list = data.find_albums(search, root.iter(const.ALBUM))
+        return render_template('list_albums.html', my_list=albums_list)
+    elif ((id != None) or (len(id) < 1)):
+        print("album search for >" + str(id) + "<")
+        album = data.get_album(id, root.iter(const.ALBUM))
+        return render_template('album.html', my_list=album)
     else:
-        albums = listout(matchedAlbum(search, root.iter(constants.ALBUM)))
-    return albums
+        return render_template('bad_request.html')
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=constants.PORT, host=constants.HOST)
+    app.run(debug=svr.DEBUG, port=svr.PORT, host=svr.HOST)
