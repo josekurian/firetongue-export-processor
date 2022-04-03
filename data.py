@@ -27,7 +27,20 @@ def find_albums(name: str, albums: Iterator):
     return matches
 
 
+def find_artists(name: str, artists: Iterator):
+    matches = []
+    found = 0
+    
+    return matches
+
+
 def get_album(id: str, albums: Iterator):
     album = [{const.TITLE, ""}]
 
     return album
+
+
+def get_artist(id: str, albums: Iterator):
+    artist = [{const.TITLE, ""}]
+
+    return artit
