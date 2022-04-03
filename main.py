@@ -103,6 +103,12 @@ def listout(my_list: list):
 def params():
     return render_template('help.html')
 
+@ app.route('/home/')
+@ app.route('/home')
+@ app.route('/')
+def home():
+    return render_template('home.html')
+
 
 @ app.route('/test/')
 def test():
