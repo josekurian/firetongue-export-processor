@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Flask Template Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </style>
+  </head>
+  <body>
+
+  <table>
+  <tr>
+    <th>Album</th>
+    <th>Artist</th>
+    <th>Id</th>
+  </tr>
+  {% for n in my_list %}
+        <li></li>
+
+  <tr>
+    <td>{{n[0]}}</td>
+    <td>-</td>
+    <td><a href="/album?id={{n[1]}}">{{n[1]}}</a>
+      </td>
+  </tr>
+        {% endfor %}
+</table>
+
+  </body>
+</html>      
