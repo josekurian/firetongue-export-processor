@@ -83,7 +83,7 @@ def extractIdCriteria(args, baseUrl: str):
     """
     id_str = args.get("id")
 
-    print("Search request using >" + str(id_str) + "<")
+    print("Id request using >" + str(id_str) + "<")
     return id_str
 
 
@@ -102,6 +102,7 @@ def listout(my_list: list):
 @ app.route('/help')
 def params():
     return render_template('help.html')
+
 
 @ app.route('/home/')
 @ app.route('/home')
@@ -135,15 +136,34 @@ def album():
     root = tree.getroot()
     id = id = extractIdCriteria(request.args, request.base_url)
     search = extractSearchCriteria(request.args, request.base_url)
-    if ((search != None) and (len(search) < 1)):
+    if ((search != None) and (len(search) > 1)):
         print("album search for >" + str(search) + "<")
         albums_list = data.find_albums(search, root.iter(const.ALBUM))
         return render_template('list_albums.html', my_list=albums_list)
-    elif ((id != None) or (len(id) < 1)):
+    elif ((id != None) and (len(id) >= 1)):
         print("album search for >" + str(id) + "<")
         album = data.get_album(id, root.iter(const.ALBUM))
         return render_template('album.html', my_list=album)
     else:
+        return render_template('bad_request.html')
+
+
+@ app.route('/artist')
+@ app.route('/artist/')
+def artist():
+    root = tree.getroot()
+    id = extractIdCriteria(request.args, request.base_url)
+    search = extractSearchCriteria(request.args, request.base_url)
+    if ((search != None) and (len(search) > 1)):
+        print("album search for >" + str(search) + "<")
+        albums_list = data.find_artists(search, root.iter(const.ALBUM))
+        return render_template('list_albums.html', my_list=albums_list)
+    elif ((id != None) and (len(id) >= 1)):
+        print("album search for >" + str(id) + "<")
+        artist = data.get_artist(id, root.iter(const.ALBUM))
+        return render_template('artist.html', my_list=artist)
+    else:
+        print(f"Artist search search id={id} and artists={search}")
         return render_template('bad_request.html')
 
 
