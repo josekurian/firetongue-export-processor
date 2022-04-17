@@ -27,10 +27,22 @@ def find_albums(name: str, albums: Iterator):
     return matches
 
 
-def find_artists(name: str, artists: Iterator):
+def find_artists(name: str, albums: Iterator):
     matches = []
     found = 0
-    
+
+    for album in albums:
+        artistlist = album.find(const.ARTISTSOONALBUM)
+        for artist_on_album in artistlist:
+            artist = None
+            artist_data = artist_on_album.find(const.ARTISTONALBUM)
+            if (artist_data != None):
+                artist = artist_data.text
+            if ((artist != None) and (artist.find(name) > 0)):
+                matches.append([artist, album.get(const.ID)])
+                found += 1
+
+    print(" matches made = " + str(found))
     return matches
 
 
