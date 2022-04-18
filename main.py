@@ -155,9 +155,9 @@ def artist():
     id = extractIdCriteria(request.args, request.base_url)
     search = extractSearchCriteria(request.args, request.base_url)
     if ((search != None) and (len(search) > 1)):
-        print("album search for >" + str(search) + "<")
-        albums_list = data.find_artists(search, root.iter(const.ALBUM))
-        return render_template('list_albums.html', my_list=albums_list)
+        print("artist search for >" + str(search) + "<")
+        artists_list = data.find_artists(search, root.iter(const.ALBUM))
+        return render_template('list_artists.html', my_list=artists_list)
     elif ((id != None) and (len(id) >= 1)):
         print("album search for >" + str(id) + "<")
         artist = data.get_artist(id, root.iter(const.ALBUM))
